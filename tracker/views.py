@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.db.models import Sum
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 from .models import WeeklyDelivery
 
 class DeliveryListView(ListView):
@@ -26,6 +28,7 @@ class DeliveryListView(ListView):
             total_shortfall=Sum('total_shortfall'),
         )
         context['totals'] = totals
+        context['csrf_token'] = get_token(self.request)
         return context
 
 class DeliveryCreateView(CreateView):
@@ -34,22 +37,16 @@ class DeliveryCreateView(CreateView):
     fields = '__all__'
     success_url = reverse_lazy('delivery_list')
 
-class DeliveryUpdateView(UpdateView):
-    model = WeeklyDelivery
-    template_name = 'tracker/delivery_form.html'
-    fields = '__all__'
-    success_url = reverse_lazy('delivery_list')
+    def get_template_names(self):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return ['tracker/delivery_form_modal.html']
+        return super().get_template_names()
 
-class DeliveryDeleteView(DeleteView):
-    model = WeeklyDelivery
-    template_name = 'tracker/delivery_confirm_delete.html'
-    success_url = reverse_lazy('delivery_list')
-
-class DeliveryCreateView(CreateView):
-    model = WeeklyDelivery
-    template_name = 'tracker/delivery_form.html'
-    fields = '__all__'
-    success_url = reverse_lazy('delivery_list')
+    def form_valid(self, form):
+        super().form_valid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        return super().form_valid(form)
 
 class DeliveryUpdateView(UpdateView):
     model = WeeklyDelivery
@@ -57,7 +54,24 @@ class DeliveryUpdateView(UpdateView):
     fields = '__all__'
     success_url = reverse_lazy('delivery_list')
 
+    def get_template_names(self):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return ['tracker/delivery_form_modal.html']
+        return super().get_template_names()
+
+    def form_valid(self, form):
+        super().form_valid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        return super().form_valid(form)
+
 class DeliveryDeleteView(DeleteView):
     model = WeeklyDelivery
     template_name = 'tracker/delivery_confirm_delete.html'
     success_url = reverse_lazy('delivery_list')
+
+    def delete(self, request, *args, **kwargs):
+        super().delete(request, *args, **kwargs)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        return super().delete(request, *args, **kwargs)
