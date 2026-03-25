@@ -231,11 +231,11 @@
         });
 
         // Scroll to submit button if there are form errors
-        {% if form.errors %}
+        // {% if form.errors %}
         setTimeout(() => {
             document.querySelector('.submit-section').scrollIntoView({ behavior: 'smooth' });
         }, 100);
-        {% endif %}
+        // {% endif %}
     });
 </script>
 {% endblock %}
