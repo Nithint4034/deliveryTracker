@@ -4,16 +4,17 @@
 
 {% block content %}
 <style>
-    .form-field input[type="date"] {
+    .form-field input, .form-field select, .form-field textarea {
         width: 100%;
         padding: 0.5rem;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 1rem;
         background-color: white;
-        cursor: pointer;
+        overflow: hidden;
+        resize: none;
     }
-    .form-field input[type="date"]:focus {
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
         outline: none;
         border-color: #007bff;
         box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
@@ -65,6 +66,7 @@
     </div>
     {% endif %}
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <!-- Show date fields in both create and edit modes -->
         <div class="form-field">
             <label for="{{ form.start_date.id_for_label }}">Start Date (Monday):</label>
             <div class="date-input-container">
@@ -150,11 +152,13 @@
             {{ form.total_shortfall }}
             {% if form.total_shortfall.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.total_shortfall.errors.0 }}</div>{% endif %}
         </div>
+        {% if not object %}
+        <!-- Only show shortfall percentage in create mode -->
         <div class="form-field">
-            <label for="{{ form.shortfall_percentage.id_for_label }}">Shortfall %:</label>
             {{ form.shortfall_percentage }}
             {% if form.shortfall_percentage.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.shortfall_percentage.errors.0 }}</div>{% endif %}
         </div>
+        {% endif %}
     </div>
 
     <div class="submit-section">

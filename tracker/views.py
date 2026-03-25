@@ -51,7 +51,7 @@ class DeliveryCreateView(CreateView):
 class DeliveryUpdateView(UpdateView):
     model = WeeklyDelivery
     template_name = 'tracker/delivery_form.html'
-    fields = '__all__'
+    fields = ['start_date', 'end_date', 'video_drive_target', 'video_drive_achieved', 'video_drive_shortfall', 'travel_mobile_target', 'travel_mobile_achieved', 'travel_mobile_shortfall', 'mca_sourcing_target', 'mca_sourcing_achieved', 'mca_sourcing_shortfall', 'total_target', 'total_achieved', 'total_shortfall']
     success_url = reverse_lazy('delivery_list')
 
     def get_template_names(self):
