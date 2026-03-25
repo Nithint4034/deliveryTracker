@@ -1,0 +1,241 @@
+{% extends 'pages/base.html' %}
+
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Delivery Entry - Delivery Tracker{% endblock %}
+
+{% block content %}
+<style>
+    .form-field input[type="date"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+        background-color: white;
+        cursor: pointer;
+    }
+    .form-field input[type="date"]:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    .date-input-container {
+        position: relative;
+    }
+    .date-input {
+        /* Additional styling for date inputs */
+    }
+    .form-field label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: bold;
+    }
+    .form-section h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.25rem;
+    }
+    .submit-section {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
+<h2>{% if object %}Edit{% else %}Add New{% endif %} Delivery Entry</h2>
+
+<form method="post" style="max-width: 800px; margin: 0 auto;">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #f5c6cb;">
+        <h4>Please correct the following errors:</h4>
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-field">
+            <label for="{{ form.start_date.id_for_label }}">Start Date (Monday):</label>
+            <div class="date-input-container">
+                <input type="date" name="start_date" id="{{ form.start_date.id_for_label }}" value="{% if form.start_date.value %}{{ form.start_date.value|date:'Y-m-d' }}{% endif %}" class="date-input">
+            </div>
+            {% if form.start_date.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.start_date.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.end_date.id_for_label }}">End Date (Friday):</label>
+            <div class="date-input-container">
+                <input type="date" name="end_date" id="{{ form.end_date.id_for_label }}" value="{% if form.end_date.value %}{{ form.end_date.value|date:'Y-m-d' }}{% endif %}" class="date-input">
+            </div>
+            {% if form.end_date.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.end_date.errors.0 }}</div>{% endif %}
+        </div>
+
+        <h3 class="form-section" style="grid-column: span 2;">Video Drive Coding</h3>
+        <div class="form-field">
+            <label for="{{ form.video_drive_target.id_for_label }}">Target:</label>
+            {{ form.video_drive_target }}
+            {% if form.video_drive_target.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.video_drive_target.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.video_drive_achieved.id_for_label }}">Achieved:</label>
+            {{ form.video_drive_achieved }}
+            {% if form.video_drive_achieved.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.video_drive_achieved.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.video_drive_shortfall.id_for_label }}">Shortfall:</label>
+            {{ form.video_drive_shortfall }}
+            {% if form.video_drive_shortfall.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.video_drive_shortfall.errors.0 }}</div>{% endif %}
+        </div>
+        <div></div>
+
+        <h3 class="form-section" style="grid-column: span 2;">W&V-Travelshoot/Mobile App</h3>
+        <div class="form-field">
+            <label for="{{ form.travel_mobile_target.id_for_label }}">Target:</label>
+            {{ form.travel_mobile_target }}
+            {% if form.travel_mobile_target.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.travel_mobile_target.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.travel_mobile_achieved.id_for_label }}">Achieved:</label>
+            {{ form.travel_mobile_achieved }}
+            {% if form.travel_mobile_achieved.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.travel_mobile_achieved.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.travel_mobile_shortfall.id_for_label }}">Shortfall:</label>
+            {{ form.travel_mobile_shortfall }}
+            {% if form.travel_mobile_shortfall.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.travel_mobile_shortfall.errors.0 }}</div>{% endif %}
+        </div>
+        <div></div>
+
+        <h3 class="form-section" style="grid-column: span 2;">MCA/NH/Sourcing</h3>
+        <div class="form-field">
+            <label for="{{ form.mca_sourcing_target.id_for_label }}">Target:</label>
+            {{ form.mca_sourcing_target }}
+            {% if form.mca_sourcing_target.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.mca_sourcing_target.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.mca_sourcing_achieved.id_for_label }}">Achieved:</label>
+            {{ form.mca_sourcing_achieved }}
+            {% if form.mca_sourcing_achieved.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.mca_sourcing_achieved.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.mca_sourcing_shortfall.id_for_label }}">Shortfall:</label>
+            {{ form.mca_sourcing_shortfall }}
+            {% if form.mca_sourcing_shortfall.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.mca_sourcing_shortfall.errors.0 }}</div>{% endif %}
+        </div>
+        <div></div>
+
+        <h3 class="form-section" style="grid-column: span 2;">Total</h3>
+        <div class="form-field">
+            <label for="{{ form.total_target.id_for_label }}">Target:</label>
+            {{ form.total_target }}
+            {% if form.total_target.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.total_target.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.total_achieved.id_for_label }}">Achieved:</label>
+            {{ form.total_achieved }}
+            {% if form.total_achieved.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.total_achieved.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.total_shortfall.id_for_label }}">Shortfall:</label>
+            {{ form.total_shortfall }}
+            {% if form.total_shortfall.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.total_shortfall.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+            <label for="{{ form.shortfall_percentage.id_for_label }}">Shortfall %:</label>
+            {{ form.shortfall_percentage }}
+            {% if form.shortfall_percentage.errors %}<div style="color: red; font-size: 0.875rem;">{{ form.shortfall_percentage.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="submit-section">
+        <button type="submit" style="background-color: #007bff; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold;">{% if object %}Update{% else %}Create{% endif %} Entry</button>
+        <a href="{% url 'delivery_list' %}" style="margin-left: 1rem; color: #6c757d; text-decoration: none; padding: 0.75rem 1.5rem; border: 1px solid #dee2e6; border-radius: 4px; background-color: #fff;">Cancel</a>
+    </div>
+</form>
+
+<script>
+    // Enhanced date picker functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
+        const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+
+        // Set minimum date to prevent selecting past dates
+        // const today = new Date().toISOString().split('T')[0];
+        // startDateInput.min = today;
+        // endDateInput.min = today;
+
+        // Auto-calculate end date when start date changes
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', function() {
+                const startDate = new Date(this.value);
+                if (startDate && !isNaN(startDate)) {
+                    // Calculate Friday of the same week
+                    const dayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+                    // If not Monday, adjust to Monday
+                    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+                    const monday = new Date(startDate);
+                    monday.setDate(startDate.getDate() + mondayOffset);
+
+                    // Calculate Friday (4 days after Monday)
+                    const friday = new Date(monday);
+                    friday.setDate(monday.getDate() + 4);
+
+                    // Format as YYYY-MM-DD
+                    const formatDate = (date) => {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    };
+
+                    // Update the inputs
+                    startDateInput.value = formatDate(monday);
+                    endDateInput.value = formatDate(friday);
+
+                    // Set end date minimum to start date
+                    // endDateInput.min = startDateInput.value;
+                }
+            });
+
+            // Ensure end date is not before start date
+            // endDateInput.addEventListener('change', function() {
+            //     const startDate = new Date(startDateInput.value);
+            //     const endDate = new Date(this.value);
+            // 
+            //     if (endDate < startDate) {
+            //         alert('End date cannot be before start date. Please select a valid date range.');
+            //         this.value = '';
+            //     }
+            // });
+        }
+
+        // Add click event to ensure calendar opens
+        [startDateInput, endDateInput].forEach(input => {
+            if (input) {
+                input.addEventListener('click', function() {
+                    // This helps trigger the calendar in some browsers
+                    this.showPicker && this.showPicker();
+                });
+            }
+        });
+
+        // Scroll to submit button if there are form errors
+        {% if form.errors %}
+        setTimeout(() => {
+            document.querySelector('.submit-section').scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        {% endif %}
+    });
+</script>
+{% endblock %}

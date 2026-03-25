@@ -1,0 +1,23 @@
+{% extends 'pages/base.html' %}
+
+{% block title %}Home - Delivery Tracker{% endblock %}
+
+{% block content %}
+<h2>Welcome to Delivery Tracker</h2>
+<p>This is the home page of your delivery tracking application.</p>
+<p>Here you can track your deliveries, view status updates, and manage your shipments.</p>
+
+<div style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3>Features</h3>
+    <ul>
+        <li>Real-time delivery tracking</li>
+        <li>Shipment history</li>
+        <li>Delivery notifications</li>
+        <li>Customer support</li>
+    </ul>
+</div>
+
+<div style="margin-top: 2rem;">
+    <a href="/admin/" style="background-color: #007bff; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">Go to Admin</a>
+</div>
+{% endblock %}

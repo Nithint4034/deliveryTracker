@@ -1,0 +1,85 @@
+{% extends 'pages/base.html' %}
+{% load humanize %}
+
+{% block title %}Weekly Internal Delivery - Delivery Tracker{% endblock %}
+
+{% block content %}
+<h2>Weekly Internal Delivery</h2>
+
+<div style="margin-bottom: 2rem;">
+    <a href="{% url 'delivery_create' %}" style="background-color: #28a745; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">Add New Entry</a>
+</div>
+
+<div style="width: 100%; overflow-x: auto; margin: 1rem 0;">
+    <table style="width: 100%; min-width: 1200px; border-collapse: collapse; margin-bottom: 2rem; font-size: 0.875rem;">
+        <thead>
+            <tr style="background-color: #f8f9fa;">
+                <th style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; white-space: nowrap;">S. No.</th>
+                <th style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; white-space: nowrap; min-width: 150px;">Week</th>
+                <th colspan="3" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">Video Drive Coding</th>
+                <th colspan="3" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">W&V-Travelshoot/Mobile App</th>
+                <th colspan="3" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">MCA/NH/Sourcing</th>
+                <th colspan="4" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">Total</th>
+                <th style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; white-space: nowrap;">Actions</th>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <th></th>
+                <th></th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
+                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall %</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">{{ forloop.counter }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">{{ delivery.week_display }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.video_drive_target|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.video_drive_achieved|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.video_drive_shortfall|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.travel_mobile_target|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.travel_mobile_achieved|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.travel_mobile_shortfall|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.mca_sourcing_target|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.mca_sourcing_achieved|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.mca_sourcing_shortfall|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.total_target|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.total_achieved|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.total_shortfall|floatformat:0|intcomma }}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.shortfall_percentage }}%</td>
+                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                    <a href="{% url 'delivery_update' delivery.pk %}" style="color: #007bff; margin-right: 10px;">Edit</a>
+                    <a href="{% url 'delivery_delete' delivery.pk %}" style="color: #dc3545;" onclick="return confirm('Are you sure you want to delete this entry?')">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="17" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No delivery data available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if deliveries %}
+<div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px;">
+    <h3>Totals</h3>
+    <p><strong>Video Drive Coding:</strong> Target: {{ totals.video_drive_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.video_drive_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.video_drive_shortfall|default:0|floatformat:0|intcomma }}</p>
+    <p><strong>W&V-Travelshoot/Mobile App:</strong> Target: {{ totals.travel_mobile_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.travel_mobile_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.travel_mobile_shortfall|default:0|floatformat:0|intcomma }}</p>
+    <p><strong>MCA/NH/Sourcing:</strong> Target: {{ totals.mca_sourcing_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.mca_sourcing_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.mca_sourcing_shortfall|default:0|floatformat:0|intcomma }}</p>
+    <p><strong>Total:</strong> Target: {{ totals.total_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.total_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.total_shortfall|default:0|floatformat:0|intcomma }}</p>
+</div>
+{% endif %}
+{% endblock %}
