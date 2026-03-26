@@ -37,6 +37,19 @@ class DeliveryCreateView(CreateView):
     fields = '__all__'
     success_url = reverse_lazy('delivery_list')
 
+    def get_initial(self):
+        initial = super().get_initial()
+        previous_delivery = WeeklyDelivery.objects.order_by('-start_date', '-pk').first()
+
+        if previous_delivery is not None:
+            initial.update({
+                'video_drive_target': previous_delivery.video_drive_target,
+                'travel_mobile_target': previous_delivery.travel_mobile_target,
+                'mca_sourcing_target': previous_delivery.mca_sourcing_target,
+            })
+
+        return initial
+
     def get_template_names(self):
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return ['tracker/delivery_form_modal.html']

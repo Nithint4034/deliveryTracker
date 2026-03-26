@@ -119,6 +119,76 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteWeek = document.getElementById('delete-week');
     let deleteUrl = '';
 
+    function initModalAutoCalculation() {
+        const form = document.getElementById('delivery-form');
+        if (!form) {
+            return;
+        }
+
+        const getNum = (name) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            return input ? (parseFloat(input.value) || 0) : 0;
+        };
+
+        const setNum = (name, value) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            if (input) {
+                input.value = value;
+            }
+        };
+
+        const setReadOnly = (name) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            if (input) {
+                input.readOnly = true;
+                input.style.backgroundColor = '#f0f4f8';
+            }
+        };
+
+        const recalc = () => {
+            const videoShortfall = getNum('video_drive_target') - getNum('video_drive_achieved');
+            const travelShortfall = getNum('travel_mobile_target') - getNum('travel_mobile_achieved');
+            const mcaShortfall = getNum('mca_sourcing_target') - getNum('mca_sourcing_achieved');
+
+            setNum('video_drive_shortfall', videoShortfall);
+            setNum('travel_mobile_shortfall', travelShortfall);
+            setNum('mca_sourcing_shortfall', mcaShortfall);
+
+            const totalTarget = getNum('video_drive_target') + getNum('travel_mobile_target') + getNum('mca_sourcing_target');
+            const totalAchieved = getNum('video_drive_achieved') + getNum('travel_mobile_achieved') + getNum('mca_sourcing_achieved');
+            const totalShortfall = totalTarget - totalAchieved;
+
+            setNum('total_target', totalTarget);
+            setNum('total_achieved', totalAchieved);
+            setNum('total_shortfall', totalShortfall);
+        };
+
+        [
+            'video_drive_target',
+            'video_drive_achieved',
+            'travel_mobile_target',
+            'travel_mobile_achieved',
+            'mca_sourcing_target',
+            'mca_sourcing_achieved',
+        ].forEach((name) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            if (input) {
+                input.addEventListener('input', recalc);
+            }
+        });
+
+        [
+            'video_drive_shortfall',
+            'travel_mobile_shortfall',
+            'mca_sourcing_shortfall',
+            'total_target',
+            'total_achieved',
+            'total_shortfall',
+        ].forEach(setReadOnly);
+
+        recalc();
+    }
+
     // Open modal for add
     addBtn.addEventListener('click', function() {
         fetch('{% url "delivery_create" %}', {
@@ -129,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.text())
         .then(html => {
             modalContent.innerHTML = html;
+            initModalAutoCalculation();
             modal.style.display = 'block';
         });
     });
@@ -145,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.text())
             .then(html => {
                 modalContent.innerHTML = html;
+                initModalAutoCalculation();
                 modal.style.display = 'block';
             });
         });
