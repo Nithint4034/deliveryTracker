@@ -1,0 +1,99 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Delete {{ tracker_title }} Entry - Delivery Tracker{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --panel: #ffffff;
+        --danger: #dc2626;
+        --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .delete-container {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        width: 100%;
+        max-width: 600px;
+        margin: 2rem auto;
+        box-sizing: border-box;
+    }
+
+    .delete-container h2 {
+        color: var(--ink);
+        margin-top: 0;
+    }
+
+    .delete-warning {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0 1.5rem 0;
+    }
+
+    .delete-warning p {
+        margin: 0;
+        color: var(--danger);
+        font-weight: 600;
+    }
+
+    .delete-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .btn-danger {
+        background-color: var(--danger);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        filter: brightness(0.95);
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: var(--ink);
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+</style>
+
+<div class="delete-container">
+    <h2>Delete {{ tracker_title }} Entry</h2>
+
+    <p>Are you sure you want to delete the entry for phase <strong>"{{ object.phase }}"</strong> ({{ object.planned_delivery_date|date:"d/M/y" }})?</p>
+
+    <div class="delete-warning">
+        <p>⚠️ This action cannot be undone.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="delete-actions">
+            <button type="submit" class="btn btn-danger">Yes, Delete Entry</button>
+            <a href="{% url cancel_url_name %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

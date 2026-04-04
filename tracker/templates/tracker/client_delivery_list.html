@@ -1,0 +1,495 @@
+{% extends 'tracker/base.html' %}
+{% load humanize %}
+
+{% block title %}{{ tracker_title }} - Delivery Tracker{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --panel: #ffffff;
+        --panel-soft: #f9fafb;
+        --brand: #2563eb;
+        --brand-dark: #1d4ed8;
+        --success: #15803d;
+        --danger: #dc2626;
+        --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .page-shell {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 1.25rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .page-head h2 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 1.35rem;
+    }
+
+    .page-subtitle {
+        margin: 0.35rem 0 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .btn-primary {
+        background: var(--success);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        margin: 0.8rem 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+    }
+
+    .delivery-table {
+        width: 100%;
+        min-width: 1200px;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        background: #fff;
+    }
+
+    .delivery-table thead tr:first-child {
+        background: #eef2ff;
+    }
+
+    .delivery-table thead tr:nth-child(2) {
+        background: #f8fafc;
+    }
+
+    .delivery-table th,
+    .delivery-table td {
+        border: 1px solid var(--line);
+        padding: 10px 8px;
+    }
+
+    .delivery-table th {
+        text-align: center;
+        font-weight: 700;
+        color: #334155;
+        white-space: nowrap;
+    }
+
+    .delivery-table td {
+        text-align: right;
+        color: var(--ink);
+    }
+
+    .delivery-table td.center {
+        text-align: center;
+    }
+
+    .delivery-table tbody tr:nth-child(even) {
+        background: #fcfdff;
+    }
+
+    .shortfall {
+        color: var(--danger) !important;
+        font-weight: 700;
+    }
+
+    .delivery-table td.shortfall {
+        color: #dc2626 !important;
+    }
+
+    .action-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 0.86rem;
+        font-weight: 700;
+        padding: 0;
+    }
+
+    .action-btn.edit {
+        color: var(--brand);
+        margin-right: 0.65rem;
+    }
+
+    .action-btn.edit:hover {
+        color: var(--brand-dark);
+    }
+
+    .action-btn.delete {
+        color: var(--danger);
+    }
+
+    .totals-card {
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .totals-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.8rem;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 0.65rem;
+    }
+
+    .totals-card h3 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 1.05rem;
+    }
+
+    .totals-badge {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .totals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .totals-item {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.75rem;
+    }
+
+    .totals-label {
+        margin: 0 0 0.55rem;
+        color: #111827;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .totals-values {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+        font-size: 0.86rem;
+        color: #374151;
+    }
+
+    .totals-values span strong {
+        color: #0f172a;
+    }
+
+    @media (max-width: 920px) {
+        .totals-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-body {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 90%;
+        overflow-y: auto;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+    }
+
+    .modal-body.small {
+        max-width: 420px;
+    }
+
+    .modal-close {
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-danger {
+        background-color: var(--danger);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background-color: #6b7280;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    @media (max-width: 720px) {
+        .page-shell {
+            padding: 0.85rem;
+        }
+    }
+</style>
+
+<section class="page-shell">
+    <div class="page-head">
+        <div>
+            <h2>{{ tracker_title }}</h2>
+            <p class="page-subtitle">{{ page_subtitle }}</p>
+        </div>
+        <button id="add-entry-btn" class="btn btn-primary">Add New Entry</button>
+    </div>
+
+<div class="table-wrap">
+    <table class="delivery-table">
+        <thead>
+            <tr>
+                <th>S. No.</th>
+                <th>Phase</th>
+                <th>Planned Delivery Date</th>
+                <th>Planned Count</th>
+                <th>Actual Delivery Date</th>
+                <th>Actual Count</th>
+                <th>Weeks from Last</th>
+                <th>Total POI Delivery</th>
+                <th>POI Inventory</th>
+                <th>Data Type</th>
+                <th>Comments</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td class="center">{{ forloop.counter }}</td>
+                <td class="center">{{ delivery.phase }}</td>
+                <td class="center">{{ delivery.planned_delivery_date|date:"d/M/y" }}</td>
+                <td>{{ delivery.planned_delivery_count|floatformat:0|intcomma }}</td>
+                <td class="center">{{ delivery.actual_delivery_date|date:"d/M/y"|default:"-" }}</td>
+                <td>{{ delivery.actual_delivery_count|floatformat:0|intcomma }}</td>
+                <td class="center">{{ delivery.no_of_weeks_from_last_delivery|default:"-" }}</td>
+                <td>{{ delivery.total_new_poi_delivery_till_date|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.new_poi_inventory_not_delivered|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.type_of_data|default:"-" }}</td>
+                <td>{{ delivery.comments|truncatewords:5|default:"-" }}</td>
+                <td class="center">
+                    <button class="action-btn edit edit-btn" data-url="{% url update_url_name delivery.pk %}">Edit</button>
+                    <button class="action-btn delete delete-btn" data-url="{% url delete_url_name delivery.pk %}" data-phase="{{ delivery.phase }}">Delete</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="12" class="center">No delivery data available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if deliveries %}
+<div class="totals-card">
+    <div class="totals-head">
+        <h3>Total's Overview</h3>
+        <span class="totals-badge">Auto Summary</span>
+    </div>
+    <div class="totals-grid">
+        <article class="totals-item">
+            <p class="totals-label">Planned Delivery</p>
+            <div class="totals-values">
+                <span><strong>Count:</strong> {{ totals.planned_delivery_count|default:0|floatformat:0|intcomma }}</span>
+            </div>
+        </article>
+        <article class="totals-item">
+            <p class="totals-label">Actual Delivery</p>
+            <div class="totals-values">
+                <span><strong>Count:</strong> {{ totals.actual_delivery_count|default:0|floatformat:0|intcomma }}</span>
+            </div>
+        </article>
+        <article class="totals-item">
+            <p class="totals-label">Total POI Delivery</p>
+            <div class="totals-values">
+                <span><strong>Count:</strong> {{ totals.total_new_poi_delivery_till_date|default:0|floatformat:0|intcomma }}</span>
+            </div>
+        </article>
+        <article class="totals-item">
+            <p class="totals-label">POI Inventory</p>
+            <div class="totals-values">
+                <span><strong>Count:</strong> {{ totals.new_poi_inventory_not_delivered|default:0|floatformat:0|intcomma }}</span>
+            </div>
+        </article>
+    </div>
+</div>
+{% endif %}
+</section>
+
+<!-- Modal -->
+<div id="form-modal" class="modal-overlay">
+    <div class="modal-body">
+        <span id="close-modal" class="modal-close">&times;</span>
+        <div id="modal-content"></div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="delete-modal" class="modal-overlay">
+    <div class="modal-body small">
+        <span id="close-delete-modal" class="modal-close">&times;</span>
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete the delivery entry for <strong id="delete-phase"></strong>?</p>
+        <p class="shortfall">This action cannot be undone.</p>
+        <div style="margin-top: 20px; text-align: right;">
+            <button id="confirm-delete" class="btn-danger" style="margin-right: 10px;">Delete</button>
+            <button id="cancel-delete" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('form-modal');
+    const modalContent = document.getElementById('modal-content');
+    const closeModal = document.getElementById('close-modal');
+    const addBtn = document.getElementById('add-entry-btn');
+
+    const deleteModal = document.getElementById('delete-modal');
+    const closeDeleteModal = document.getElementById('close-delete-modal');
+    const confirmDelete = document.getElementById('confirm-delete');
+    const cancelDelete = document.getElementById('cancel-delete');
+    const deletePhase = document.getElementById('delete-phase');
+    let deleteUrl = '';
+
+    function openModal(url) {
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            modalContent.innerHTML = html;
+            modal.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error loading form:', error);
+            alert('Error loading form. Please try again.');
+        });
+    }
+
+    addBtn.addEventListener('click', () => {
+        openModal("{% url create_url_name %}");
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+        if (event.target === deleteModal) {
+            deleteModal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('edit-btn')) {
+            const url = event.target.getAttribute('data-url');
+            openModal(url);
+        }
+
+        if (event.target.classList.contains('delete-btn')) {
+            const url = event.target.getAttribute('data-url');
+            const phase = event.target.getAttribute('data-phase');
+            deleteUrl = url;
+            deletePhase.textContent = phase;
+            deleteModal.style.display = 'block';
+        }
+    });
+
+    closeDeleteModal.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+    });
+
+    cancelDelete.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+    });
+
+    confirmDelete.addEventListener('click', () => {
+        fetch(deleteUrl, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting entry');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting entry');
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Client Delivery Manager | Form</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f4f7fc;
+            margin: 0;
+            padding: 2rem 1rem;
+            color: #1e2a3e;
+        }
+
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            padding: 1.5rem 2rem 0.5rem 2rem;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-header h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        .form-body {
+            padding: 1.5rem 2rem 2rem 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            font-family: inherit;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-field .error {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        .form-section {
+            grid-column: span 2;
+            margin: 1rem 0 0.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 0.95rem;
+        }
+
+        .form-section:first-of-type {
+            margin-top: 0;
+        }
+
+        .form-errors {
+            grid-column: span 2;
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border: 1px solid #fecaca;
+            font-size: 0.9rem;
+        }
+
+        .form-errors ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1.5rem;
+        }
+
+        .form-errors li {
+            margin-bottom: 0.25rem;
+        }
+
+        .form-footer {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            grid-column: span 2;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #15803d;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #166534;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <div class="form-header">
+        <h3>{% if object %}Edit{% else %}Add New{% endif %} {{ tracker_title }} Entry</h3>
+    </div>
+    <div class="form-body">
+        <form method="post" id="client-delivery-modal-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                {% if form.errors %}
+                <div class="form-errors">
+                    <strong>Please correct the following errors:</strong>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <h4 class="form-section">Phase Information</h4>
+
+                <div class="form-field">
+                    <label for="{{ form.phase.id_for_label }}">Phase:</label>
+                    {{ form.phase }}
+                    {% if form.phase.errors %}<div class="error">{{ form.phase.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.planned_delivery_date.id_for_label }}">Planned Delivery Date:</label>
+                    <input type="date" name="planned_delivery_date" id="{{ form.planned_delivery_date.id_for_label }}" value="{% if form.planned_delivery_date.value %}{{ form.planned_delivery_date.value|date:'Y-m-d' }}{% endif %}" required>
+                    {% if form.planned_delivery_date.errors %}<div class="error">{{ form.planned_delivery_date.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.planned_delivery_count.id_for_label }}">Planned Count:</label>
+                    {{ form.planned_delivery_count }}
+                    {% if form.planned_delivery_count.errors %}<div class="error">{{ form.planned_delivery_count.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.actual_delivery_date.id_for_label }}">Actual Delivery Date:</label>
+                    <input type="date" name="actual_delivery_date" id="{{ form.actual_delivery_date.id_for_label }}" value="{% if form.actual_delivery_date.value %}{{ form.actual_delivery_date.value|date:'Y-m-d' }}{% endif %}">
+                    {% if form.actual_delivery_date.errors %}<div class="error">{{ form.actual_delivery_date.errors.0 }}</div>{% endif %}
+                </div>
+
+                <h4 class="form-section">Delivery Details</h4>
+
+                <div class="form-field">
+                    <label for="{{ form.actual_delivery_count.id_for_label }}">Actual Count:</label>
+                    {{ form.actual_delivery_count }}
+                    {% if form.actual_delivery_count.errors %}<div class="error">{{ form.actual_delivery_count.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.no_of_weeks_from_last_delivery.id_for_label }}">Weeks from Last Delivery:</label>
+                    {{ form.no_of_weeks_from_last_delivery }}
+                    {% if form.no_of_weeks_from_last_delivery.errors %}<div class="error">{{ form.no_of_weeks_from_last_delivery.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.total_new_poi_delivery_till_date.id_for_label }}">Total POI Delivery Till Date:</label>
+                    {{ form.total_new_poi_delivery_till_date }}
+                    {% if form.total_new_poi_delivery_till_date.errors %}<div class="error">{{ form.total_new_poi_delivery_till_date.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.new_poi_inventory_not_delivered.id_for_label }}">POI Inventory (Not Delivered):</label>
+                    {{ form.new_poi_inventory_not_delivered }}
+                    {% if form.new_poi_inventory_not_delivered.errors %}<div class="error">{{ form.new_poi_inventory_not_delivered.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-field full-width">
+                    <label for="{{ form.type_of_data.id_for_label }}">Type of Data:</label>
+                    {{ form.type_of_data }}
+                    {% if form.type_of_data.errors %}<div class="error">{{ form.type_of_data.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-field full-width">
+                    <label for="{{ form.comments.id_for_label }}">Comments:</label>
+                    {{ form.comments }}
+                    {% if form.comments.errors %}<div class="error">{{ form.comments.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-footer full-width">
+                    <button type="submit" class="btn btn-primary">
+                        {% if object %}Update Entry{% else %}Create Entry{% endif %}
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="parent.closeModal()">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
