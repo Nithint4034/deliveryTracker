@@ -1,7 +1,8 @@
 from django.db import models
 from datetime import date
 
-class WeeklyDelivery(models.Model):
+
+class BaseWeeklyDelivery(models.Model):
     start_date = models.DateField(default=date.today, help_text="Start date of the week (Monday)")
     end_date = models.DateField(default=date.today, help_text="End date of the week (Friday)")
     video_drive_target = models.IntegerField(default=0)
@@ -26,4 +27,14 @@ class WeeklyDelivery(models.Model):
         return f"{self.start_date.strftime('%dth %b')} - {self.end_date.strftime('%dth %b')}"
 
     class Meta:
+        abstract = True
+
+
+class WeeklyDelivery(BaseWeeklyDelivery):
+    class Meta:
         ordering = ['-start_date']  # Most recent first
+
+
+class WeeklyDeliverySecondary(BaseWeeklyDelivery):
+    class Meta:
+        ordering = ['-start_date']

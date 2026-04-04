@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import WeeklyDelivery, WeeklyDeliverySecondary
+
+
+admin.site.register(WeeklyDelivery)
+admin.site.register(WeeklyDeliverySecondary)

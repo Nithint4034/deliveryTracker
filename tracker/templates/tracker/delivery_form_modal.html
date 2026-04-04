@@ -236,11 +236,11 @@
 <body>
 <div class="form-container" id="form-modal">
     <div class="form-header">
-        <h2>{% if object %}✏️ Edit Delivery Entry{% else %}➕ Add New Delivery Entry{% endif %}</h2>
+        <h2>{% if object %}✏️ Edit {{ tracker_title }} Entry{% else %}➕ Add New {{ tracker_title }} Entry{% endif %}</h2>
         <p style="color: #5d7184; margin-top: 0.25rem;">Fill in weekly performance metrics — all fields are organized with clear spacing.</p>
     </div>
     <div class="form-body">
-        <form method="post" id="delivery-form" action="{% if object %}{% url 'delivery_update' object.pk %}{% else %}{% url 'delivery_create' %}{% endif %}">
+        <form method="post" id="delivery-form" action="{% if object %}{% url update_url_name object.pk %}{% else %}{% url create_url_name %}{% endif %}">
             {% csrf_token %}
             
             {% if form.errors %}
@@ -668,7 +668,7 @@
                 } else {
                     // fallback: navigate to delivery list or just reload index
                     if (window.location.pathname.includes('delivery')) {
-                        window.location.href = "{% url 'delivery_list' %}"; // fallback, but can't render Django url in static; better go back
+                        window.location.href = "{% url cancel_url_name %}";
                         window.history.back();
                     } else {
                         window.history.back();
@@ -679,7 +679,7 @@
                 if (modalElem && modalElem.style.display === 'none') {
                     // already hidden
                 } else if (modalElem && window.location.pathname.includes('create')) {
-                    window.location.href = "{% url 'delivery_list' %}";
+                    window.location.href = "{% url cancel_url_name %}";
                 } else {
                     window.history.back();
                 }

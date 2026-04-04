@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
@@ -7,6 +8,11 @@ from .models import WeeklyDelivery
 
 
 class DeliveryCreateViewTests(TestCase):
+	def setUp(self):
+		user_model = get_user_model()
+		self.user = user_model.objects.create_user(username='tester', password='Password123!')
+		self.client.login(username='tester', password='Password123!')
+
 	def test_create_form_prefills_target_fields_from_latest_entry(self):
 		WeeklyDelivery.objects.create(
 			start_date=date(2026, 3, 2),

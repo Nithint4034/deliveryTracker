@@ -1,72 +1,356 @@
 {% extends 'tracker/base.html' %}
 {% load humanize %}
 
-{% block title %}Weekly Internal Delivery - Delivery Tracker{% endblock %}
+{% block title %}{{ tracker_title }} - Delivery Tracker{% endblock %}
 
 {% block content %}
-<h2>Weekly Internal Delivery</h2>
+<style>
+    :root {
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --panel: #ffffff;
+        --panel-soft: #f9fafb;
+        --brand: #2563eb;
+        --brand-dark: #1d4ed8;
+        --success: #15803d;
+        --danger: #dc2626;
+        --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
 
-<div style="margin-bottom: 2rem;">
-    <button id="add-entry-btn" style="background-color: #28a745; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; border: none; cursor: pointer;">Add New Entry</button>
-</div>
+    .page-shell {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 1.25rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-<div style="width: 100%; overflow-x: auto; margin: 1rem 0;">
-    <table style="width: 100%; min-width: 1200px; border-collapse: collapse; margin-bottom: 2rem; font-size: 0.875rem;">
+    .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .page-head h2 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 1.35rem;
+    }
+
+    .page-subtitle {
+        margin: 0.35rem 0 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .btn-primary {
+        background: var(--success);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        margin: 0.8rem 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+    }
+
+    .delivery-table {
+        width: 100%;
+        min-width: 1200px;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        background: #fff;
+    }
+
+    .delivery-table thead tr:first-child {
+        background: #eef2ff;
+    }
+
+    .delivery-table thead tr:nth-child(2) {
+        background: #f8fafc;
+    }
+
+    .delivery-table th,
+    .delivery-table td {
+        border: 1px solid var(--line);
+        padding: 10px 8px;
+    }
+
+    .delivery-table th {
+        text-align: center;
+        font-weight: 700;
+        color: #334155;
+        white-space: nowrap;
+    }
+
+    .delivery-table td {
+        text-align: right;
+        color: var(--ink);
+    }
+
+    .delivery-table td.center {
+        text-align: center;
+    }
+
+    .delivery-table tbody tr:nth-child(even) {
+        background: #fcfdff;
+    }
+
+    .shortfall {
+        color: var(--danger) !important;
+        font-weight: 700;
+    }
+
+    .delivery-table td.shortfall {
+        color: #dc2626 !important;
+    }
+
+    .action-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 0.86rem;
+        font-weight: 700;
+        padding: 0;
+    }
+
+    .action-btn.edit {
+        color: var(--brand);
+        margin-right: 0.65rem;
+    }
+
+    .action-btn.edit:hover {
+        color: var(--brand-dark);
+    }
+
+    .action-btn.delete {
+        color: var(--danger);
+    }
+
+    .totals-card {
+        background: var(--panel-soft);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .totals-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.8rem;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 0.65rem;
+    }
+
+    .totals-card h3 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 1.05rem;
+    }
+
+    .totals-badge {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .totals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .totals-item {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0.75rem;
+    }
+
+    .totals-label {
+        margin: 0 0 0.55rem;
+        color: #111827;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .totals-values {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+        font-size: 0.86rem;
+        color: #374151;
+    }
+
+    .totals-values span strong {
+        color: #0f172a;
+    }
+
+    @media (max-width: 920px) {
+        .totals-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-body {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 90%;
+        overflow-y: auto;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+    }
+
+    .modal-body.small {
+        max-width: 420px;
+    }
+
+    .modal-close {
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-danger {
+        background-color: var(--danger);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background-color: #6b7280;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    @media (max-width: 720px) {
+        .page-shell {
+            padding: 0.85rem;
+        }
+    }
+</style>
+
+<section class="page-shell">
+    <div class="page-head">
+        <div>
+            <h2>{{ tracker_title }}</h2>
+            <p class="page-subtitle">{{ page_subtitle }}</p>
+        </div>
+        <button id="add-entry-btn" class="btn btn-primary">Add New Entry</button>
+    </div>
+
+<div class="table-wrap">
+    <table class="delivery-table">
         <thead>
-            <tr style="background-color: #f8f9fa;">
-                <th style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; white-space: nowrap;">S. No.</th>
-                <th style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; white-space: nowrap; min-width: 150px;">Week</th>
-                <th colspan="3" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">Video Drive Coding</th>
-                <th colspan="3" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">W&V-Travelshoot/Mobile App</th>
-                <th colspan="3" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">MCA/NH/Sourcing</th>
-                <th colspan="4" style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; background-color: #e9ecef;">Total</th>
-                <th style="border: 1px solid #ddd; padding: 12px 8px; text-align: center; font-weight: 600; white-space: nowrap;">Actions</th>
+            <tr>
+                <th>S. No.</th>
+                <th style="min-width: 150px;">Week</th>
+                <th colspan="3">Video Drive Coding</th>
+                <th colspan="3">W&V-Travelshoot/Mobile App</th>
+                <th colspan="3">MCA/NH/Sourcing</th>
+                <th colspan="4">Total</th>
+                <th>Actions</th>
             </tr>
-            <tr style="background-color: #f8f9fa;">
+            <tr>
                 <th></th>
                 <th></th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Target</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Achieved</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall</th>
-                <th style="border: 1px solid #ddd; padding: 8px 4px; font-weight: 500;">Shortfall %</th>
+                <th>Target</th>
+                <th>Achieved</th>
+                <th>Shortfall</th>
+                <th>Target</th>
+                <th>Achieved</th>
+                <th>Shortfall</th>
+                <th>Target</th>
+                <th>Achieved</th>
+                <th>Shortfall</th>
+                <th>Target</th>
+                <th>Achieved</th>
+                <th>Shortfall</th>
+                <th>Shortfall %</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {% for delivery in deliveries %}
             <tr>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">{{ forloop.counter }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">{{ delivery.week_display }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.video_drive_target|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.video_drive_achieved|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.video_drive_shortfall|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.travel_mobile_target|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.travel_mobile_achieved|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.travel_mobile_shortfall|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.mca_sourcing_target|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.mca_sourcing_achieved|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.mca_sourcing_shortfall|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.total_target|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">{{ delivery.total_achieved|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.total_shortfall|floatformat:0|intcomma }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: right; color: red;">{{ delivery.shortfall_percentage }}%</td>
-                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                    <button class="edit-btn" data-url="{% url 'delivery_update' delivery.pk %}" style="color: #007bff; margin-right: 10px; background: none; border: none; cursor: pointer;">Edit</button>
-                    <button class="delete-btn" data-url="{% url 'delivery_delete' delivery.pk %}" data-week="{{ delivery.week_display }}" style="color: #dc3545; background: none; border: none; cursor: pointer;">Delete</button>
+                <td class="center">{{ forloop.counter }}</td>
+                <td class="center">{{ delivery.week_display }}</td>
+                <td>{{ delivery.video_drive_target|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.video_drive_achieved|floatformat:0|intcomma }}</td>
+                <td class="shortfall">{{ delivery.video_drive_shortfall|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.travel_mobile_target|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.travel_mobile_achieved|floatformat:0|intcomma }}</td>
+                <td class="shortfall">{{ delivery.travel_mobile_shortfall|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.mca_sourcing_target|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.mca_sourcing_achieved|floatformat:0|intcomma }}</td>
+                <td class="shortfall">{{ delivery.mca_sourcing_shortfall|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.total_target|floatformat:0|intcomma }}</td>
+                <td>{{ delivery.total_achieved|floatformat:0|intcomma }}</td>
+                <td class="shortfall">{{ delivery.total_shortfall|floatformat:0|intcomma }}</td>
+                <td class="shortfall">{{ delivery.shortfall_percentage }}%</td>
+                <td class="center">
+                    <button class="action-btn edit edit-btn" data-url="{% url update_url_name delivery.pk %}">Edit</button>
+                    <button class="action-btn delete delete-btn" data-url="{% url delete_url_name delivery.pk %}" data-week="{{ delivery.week_display }}">Delete</button>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="17" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No delivery data available.</td>
+                <td colspan="17" class="center">No delivery data available.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -74,33 +358,67 @@
 </div>
 
 {% if deliveries %}
-<div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px;">
-    <h3>Totals</h3>
-    <p><strong>Video Drive Coding:</strong> Target: {{ totals.video_drive_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.video_drive_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.video_drive_shortfall|default:0|floatformat:0|intcomma }}</p>
-    <p><strong>W&V-Travelshoot/Mobile App:</strong> Target: {{ totals.travel_mobile_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.travel_mobile_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.travel_mobile_shortfall|default:0|floatformat:0|intcomma }}</p>
-    <p><strong>MCA/NH/Sourcing:</strong> Target: {{ totals.mca_sourcing_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.mca_sourcing_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.mca_sourcing_shortfall|default:0|floatformat:0|intcomma }}</p>
-    <p><strong>Total:</strong> Target: {{ totals.total_target|default:0|floatformat:0|intcomma }}, Achieved: {{ totals.total_achieved|default:0|floatformat:0|intcomma }}, Shortfall: {{ totals.total_shortfall|default:0|floatformat:0|intcomma }}</p>
+<div class="totals-card">
+    <div class="totals-head">
+        <h3>Total's Overview</h3>
+        <span class="totals-badge">Auto Summary</span>
+    </div>
+    <div class="totals-grid">
+        <article class="totals-item">
+            <p class="totals-label">Video Drive Coding</p>
+            <div class="totals-values">
+                <span><strong>Target:</strong> {{ totals.video_drive_target|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Achieved:</strong> {{ totals.video_drive_achieved|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Shortfall:</strong> <span class="shortfall">{{ totals.video_drive_shortfall|default:0|floatformat:0|intcomma }}</span></span>
+            </div>
+        </article>
+        <article class="totals-item">
+            <p class="totals-label">W&V-Travelshoot/Mobile App</p>
+            <div class="totals-values">
+                <span><strong>Target:</strong> {{ totals.travel_mobile_target|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Achieved:</strong> {{ totals.travel_mobile_achieved|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Shortfall:</strong> <span class="shortfall">{{ totals.travel_mobile_shortfall|default:0|floatformat:0|intcomma }}</span></span>
+            </div>
+        </article>
+        <article class="totals-item">
+            <p class="totals-label">MCA/NH/Sourcing</p>
+            <div class="totals-values">
+                <span><strong>Target:</strong> {{ totals.mca_sourcing_target|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Achieved:</strong> {{ totals.mca_sourcing_achieved|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Shortfall:</strong> <span class="shortfall">{{ totals.mca_sourcing_shortfall|default:0|floatformat:0|intcomma }}</span></span>
+            </div>
+        </article>
+        <article class="totals-item">
+            <p class="totals-label">Overall Total</p>
+            <div class="totals-values">
+                <span><strong>Target:</strong> {{ totals.total_target|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Achieved:</strong> {{ totals.total_achieved|default:0|floatformat:0|intcomma }}</span>
+                <span><strong>Shortfall:</strong> <span class="shortfall">{{ totals.total_shortfall|default:0|floatformat:0|intcomma }}</span></span>
+            </div>
+        </article>
+    </div>
 </div>
 {% endif %}
+</section>
 
 <!-- Modal -->
-<div id="form-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 900px; max-height: 90%; overflow-y: auto;">
-        <span id="close-modal" style="float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+<div id="form-modal" class="modal-overlay">
+    <div class="modal-body">
+        <span id="close-modal" class="modal-close">&times;</span>
         <div id="modal-content"></div>
     </div>
 </div>
 
 <!-- Delete Modal -->
-<div id="delete-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px;">
-        <span id="close-delete-modal" style="float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+<div id="delete-modal" class="modal-overlay">
+    <div class="modal-body small">
+        <span id="close-delete-modal" class="modal-close">&times;</span>
         <h3>Confirm Delete</h3>
         <p>Are you sure you want to delete the delivery entry for <strong id="delete-week"></strong>?</p>
-        <p style="color: #dc3545;">This action cannot be undone.</p>
+        <p class="shortfall">This action cannot be undone.</p>
         <div style="margin-top: 20px; text-align: right;">
-            <button id="confirm-delete" style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">Delete</button>
-            <button id="cancel-delete" style="background-color: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+            <button id="confirm-delete" class="btn-danger" style="margin-right: 10px;">Delete</button>
+            <button id="cancel-delete" class="btn-secondary">Cancel</button>
         </div>
     </div>
 </div>
@@ -191,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Open modal for add
     addBtn.addEventListener('click', function() {
-        fetch('{% url "delivery_create" %}', {
+        fetch('{% url create_url_name %}', {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }

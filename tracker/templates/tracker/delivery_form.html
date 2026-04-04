@@ -1,6 +1,6 @@
 {% extends 'tracker/base.html' %}
 
-{% block title %}{% if object %}Edit{% else %}Add{% endif %} Delivery Entry - Delivery Tracker{% endblock %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} {{ tracker_title }} Entry - Delivery Tracker{% endblock %}
 
 {% block content %}
 <style>
@@ -46,7 +46,7 @@
     }
 </style>
 
-<h2>{% if object %}Edit{% else %}Add New{% endif %} Delivery Entry</h2>
+<h2>{% if object %}Edit{% else %}Add New{% endif %} {{ tracker_title }} Entry</h2>
 
 <form method="post" style="max-width: 800px; margin: 0 auto;">
     {% csrf_token %}
@@ -163,7 +163,7 @@
 
     <div class="submit-section">
         <button type="submit" style="background-color: #007bff; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; font-weight: bold;">{% if object %}Update{% else %}Create{% endif %} Entry</button>
-        <a href="{% url 'delivery_list' %}" style="margin-left: 1rem; color: #6c757d; text-decoration: none; padding: 0.75rem 1.5rem; border: 1px solid #dee2e6; border-radius: 4px; background-color: #fff;">Cancel</a>
+        <a href="{% url cancel_url_name %}" style="margin-left: 1rem; color: #6c757d; text-decoration: none; padding: 0.75rem 1.5rem; border: 1px solid #dee2e6; border-radius: 4px; background-color: #fff;">Cancel</a>
     </div>
 </form>
 
