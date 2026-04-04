@@ -174,7 +174,7 @@
         <h3>{% if object %}Edit{% else %}Add New{% endif %} {{ tracker_title }} Entry</h3>
     </div>
     <div class="form-body">
-        <form method="post" id="client-delivery-modal-form">
+        <form method="post" id="client-delivery-modal-form" action=".">
             {% csrf_token %}
 
             <div class="form-grid">
@@ -258,7 +258,7 @@
                     <button type="submit" class="btn btn-primary">
                         {% if object %}Update Entry{% else %}Create Entry{% endif %}
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="parent.closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary">Cancel</button>
                 </div>
             </div>
         </form>

@@ -412,6 +412,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const deletePhase = document.getElementById('delete-phase');
     let deleteUrl = '';
 
+    function closeFormModal() {
+        modal.style.display = 'none';
+    }
+
     function openModal(url) {
         fetch(url, {
             headers: {
@@ -422,10 +426,70 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(html => {
             modalContent.innerHTML = html;
             modal.style.display = 'block';
+
+            // Attach form submission handler and set action URL
+            const form = modalContent.querySelector('form');
+            if (form) {
+                form.action = url;  // Set the form action to the URL we fetched from
+                form.addEventListener('submit', handleFormSubmit);
+            }
+
+            // Attach cancel button handler
+            const cancelBtns = modalContent.querySelectorAll('button[type="button"]');
+            cancelBtns.forEach(btn => {
+                if (btn.textContent.includes('Cancel')) {
+                    btn.addEventListener('click', closeFormModal);
+                }
+            });
         })
         .catch(error => {
             console.error('Error loading form:', error);
             alert('Error loading form. Please try again.');
+        });
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const url = form.action || window.location.href;
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    return response.json().then(data => ({ success: true, data }));
+                } else {
+                    return { success: true };
+                }
+            } else {
+                // If not OK, try to get HTML (form with errors)
+                return response.text().then(html => {
+                    modalContent.innerHTML = html;
+                    const newForm = modalContent.querySelector('form');
+                    if (newForm) {
+                        newForm.action = url;
+                        newForm.addEventListener('submit', handleFormSubmit);
+                    }
+                    return { success: false };
+                });
+            }
+        })
+        .then(result => {
+            if (result.success) {
+                closeFormModal();
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting form:', error);
+            alert('Error submitting form. Please try again.');
         });
     }
 
