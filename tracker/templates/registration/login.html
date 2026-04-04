@@ -1,0 +1,29 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Login - Delivery Tracker{% endblock %}
+
+{% block content %}
+<div style="max-width: 420px; margin: 2rem auto; background: #fff; border-radius: 8px; border: 1px solid #ddd; padding: 1.5rem;">
+    <h2 style="margin-top: 0;">Sign In</h2>
+    <p style="color: #555; margin-top: 0;">Enter your username and password to access the application.</p>
+
+    {% if form.errors %}
+    <div style="background: #ffe9e9; color: #9d1e1e; border: 1px solid #f3b6b6; padding: 0.7rem; border-radius: 4px; margin-bottom: 1rem;">
+        Invalid username or password. Please try again.
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom: 0.8rem;">
+            <label for="id_username" style="display: block; margin-bottom: 0.35rem; font-weight: bold;">Username</label>
+            <input id="id_username" name="username" type="text" required style="width: 100%; padding: 0.55rem; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label for="id_password" style="display: block; margin-bottom: 0.35rem; font-weight: bold;">Password</label>
+            <input id="id_password" name="password" type="password" required style="width: 100%; padding: 0.55rem; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        <button type="submit" style="background: #007bff; color: #fff; border: none; border-radius: 4px; padding: 0.6rem 1rem; cursor: pointer;">Login</button>
+    </form>
+</div>
+{% endblock %}

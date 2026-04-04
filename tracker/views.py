@@ -1,12 +1,19 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from .models import WeeklyDelivery
 
-class DeliveryListView(ListView):
+
+@login_required
+def home(request):
+    return render(request, 'tracker/home.html')
+
+class DeliveryListView(LoginRequiredMixin, ListView):
     model = WeeklyDelivery
     template_name = 'tracker/delivery_list.html'
     context_object_name = 'deliveries'
@@ -31,7 +38,7 @@ class DeliveryListView(ListView):
         context['csrf_token'] = get_token(self.request)
         return context
 
-class DeliveryCreateView(CreateView):
+class DeliveryCreateView(LoginRequiredMixin, CreateView):
     model = WeeklyDelivery
     template_name = 'tracker/delivery_form.html'
     fields = '__all__'
@@ -61,7 +68,7 @@ class DeliveryCreateView(CreateView):
             return JsonResponse({'success': True})
         return super().form_valid(form)
 
-class DeliveryUpdateView(UpdateView):
+class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
     model = WeeklyDelivery
     template_name = 'tracker/delivery_form.html'
     fields = ['start_date', 'end_date', 'video_drive_target', 'video_drive_achieved', 'video_drive_shortfall', 'travel_mobile_target', 'travel_mobile_achieved', 'travel_mobile_shortfall', 'mca_sourcing_target', 'mca_sourcing_achieved', 'mca_sourcing_shortfall', 'total_target', 'total_achieved', 'total_shortfall']
@@ -78,7 +85,7 @@ class DeliveryUpdateView(UpdateView):
             return JsonResponse({'success': True})
         return super().form_valid(form)
 
-class DeliveryDeleteView(DeleteView):
+class DeliveryDeleteView(LoginRequiredMixin, DeleteView):
     model = WeeklyDelivery
     template_name = 'tracker/delivery_confirm_delete.html'
     success_url = reverse_lazy('delivery_list')

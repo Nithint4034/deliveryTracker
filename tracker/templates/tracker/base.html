@@ -41,6 +41,15 @@
         <a href="/">Home</a>
         <a href="/tracker/">Delivery Tracker</a>
         <a href="/admin/">Admin</a>
+        {% if user.is_authenticated %}
+        <span style="color: #ddd; margin-left: 1rem;">Signed in as {{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display: inline; margin-left: 0.75rem;">
+            {% csrf_token %}
+            <button type="submit" style="background: #666; color: #fff; border: none; border-radius: 4px; padding: 0.35rem 0.6rem; cursor: pointer;">Logout</button>
+        </form>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        {% endif %}
     </nav>
     <main>
         {% block content %}{% endblock %}
